@@ -4,73 +4,71 @@ Input
 - ISSUE: <number>
   - If missing: ALWAYS ask.
 
-DO (create PR only)
-Goal: create the pull request on GitHub with a concise, honest description. Verify CI triggers.
+Prerequisite: .state/fix.md with build_passed=yes, check_passed=yes, push_verified=yes
+
+DO (create PR and engage)
+Goal: create PR with honest description following Mario's guidelines, then link it from the issue.
 
 SAFETY
-- Do NOT push additional commits during this step.
-- Do NOT modify source code. The fix is already done.
+- Do NOT push code. The fix is already pushed.
+- Do NOT modify source files.
 
-EXECUTION RULE (CRITICAL)
-- EXECUTE THIS. Create the PR. Verify it exists.
-- Do not stop after building the description. Actually run `gh pr create`.
+EXECUTION RULE
+- Create the PR. Comment on the issue. Do not just plan.
 
 Completion criteria
-- PR created successfully via `gh pr create`
-- PR number and URL captured
-- CI checks triggered (at least 1 check within 30s)
+- PR created via `gh pr create`
+- PR linked from issue comment
+- CI triggered
 - .state/submitted.md written
 
-## Step 0: Load prerequisites
+## Step 0: Verify prerequisites
 
 ```sh
 cd /tmp/openclaw-fork
 ISSUE=<ISSUE>
-
-if [ ! -f .state/fix.md ]; then
-  echo "ERROR: Run /fix $ISSUE first"
-  exit 1
-fi
-
-lint=$(sed -n 's/^lint_passed=//p' .state/fix.md)
-fmt=$(sed -n 's/^format_passed=//p' .state/fix.md)
-push=$(sed -n 's/^push_verified=//p' .state/fix.md)
+[ -f .state/fix.md ] || { echo "ERROR: Run /fix first"; exit 1; }
+grep -q "^build_passed=yes" .state/fix.md || { echo "ERROR: build not passed"; exit 1; }
+grep -q "^push_verified=yes" .state/fix.md || { echo "ERROR: push not verified"; exit 1; }
 branch=$(sed -n 's/^branch=//p' .state/fix.md)
-
-if [ "$lint" != "yes" ]; then echo "ERROR: lint_passed=$lint"; exit 1; fi
-if [ "$fmt" != "yes" ]; then echo "ERROR: format_passed=$fmt"; exit 1; fi
-if [ "$push" != "yes" ]; then echo "ERROR: push_verified=$push"; exit 1; fi
-if [ -z "$branch" ]; then echo "ERROR: no branch in fix.md"; exit 1; fi
-
-echo "Prerequisites verified. Creating PR from branch: $branch"
+[ -n "$branch" ] || { echo "ERROR: no branch"; exit 1; }
 ```
 
-## Step 1: Build PR title and description
+## Step 1: Build PR description
 
-Read .state/analysis.md for root cause and fix strategy.
-Read .state/fix.md for files modified.
+Per CONTRIBUTING.md: "Describe what & why" and "AI PRs: mark it, note testing level"
 
-Title format: `fix(<scope>): <brief description>`
+Title: `fix(<scope>): <brief description>`
 
-Body format (keep it short, no padding):
+Body template:
 ```
 ## Summary
 
-<1 sentence: what this PR fixes>
+<1 sentence: what this fixes>
 
 **Fixes #<ISSUE>**
 
 ## Problem
 
-<2-3 sentences: what was broken and why>
+<2-3 sentences: what was broken and why. Explain the root cause, not just the symptom.>
 
 ## Fix
 
-**`<file1>`** - <what changed and why>
-**`<file2>`** - <what changed and why>
+**`<file>`** — <what changed and why this is the right fix>
+
+## Testing
+
+- [x] `pnpm build` passes
+- [x] `pnpm check` passes
+- [x] `pnpm test` — <note any pre-existing failures>
+- <how to manually verify if applicable>
+
+## AI Disclosure
+
+AI-assisted (Claude). I understand what the code does and have verified the fix addresses the root cause described above.
 ```
 
-No marketing. No emoji. Just facts.
+No padding. No marketing. Just facts.
 
 ## Step 2: Create PR
 
@@ -82,51 +80,41 @@ gh pr create --repo openclaw/openclaw \
   --body '<body from step 1>'
 ```
 
-Capture the URL from the output.
+Capture URL.
 
-## Step 3: Extract PR number and verify
+## Step 3: Link from the issue
+
+This is what engaged contributors do. Makes it visible to maintainers watching the issue.
 
 ```sh
-pr_number=<extracted from URL>
-
-gh pr view $pr_number --repo openclaw/openclaw --json number,state,title --jq '{number,state,title}'
+gh issue comment $ISSUE --repo openclaw/openclaw --body "PR #<pr_number> addresses this — <1 sentence summary of the fix approach>."
 ```
 
-## Step 4: Wait for CI to trigger
+## Step 4: Verify CI triggered
 
 ```sh
 sleep 15
-check_count=$(gh pr view $pr_number --repo openclaw/openclaw --json statusCheckRollup --jq '.statusCheckRollup | length')
-echo "CI checks triggered: $check_count"
+pr_number=<from step 2>
+gh pr view $pr_number --repo openclaw/openclaw --json statusCheckRollup --jq '.statusCheckRollup | length'
 ```
 
-If 0 checks after 30s, note it but do not block.
-
-## Step 5: Write submitted state (MANDATORY)
-
-Write to `.state/submitted.md`:
+## Step 5: Write .state/submitted.md (MANDATORY)
 
 ```
 issue=<ISSUE>
-pr_number=<number>
-pr_url=<full URL>
-branch=<branch name>
+pr_number=<N>
+pr_url=<url>
+branch=<branch>
 submitted_at=<ISO timestamp>
-ci_checks_triggered=<count>
-
-## PR
-- Title: <title>
-- URL: <url>
-- Branch: <branch>
+issue_commented=yes
+ci_triggered=<count>
 ```
 
 Verify:
 ```sh
 ls -la .state/submitted.md
 grep "^pr_number=" .state/submitted.md
-grep "^pr_url=" .state/submitted.md
 ```
 
 ## Output
-
-"PR #<number> created for #<ISSUE>: <url>. CI running (<N> checks). Use /monitor to track."
+"PR #N created for #ISSUE: <url>. Issue commented. CI running. Use /monitor to track."

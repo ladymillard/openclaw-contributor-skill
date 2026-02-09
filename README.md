@@ -1,32 +1,33 @@
 # openclaw-contributor-skill
 
-Deterministic agentic workflow for contributing production-ready PRs to [OpenClaw](https://github.com/openclaw/openclaw).
+Deterministic agentic workflow for contributing to [OpenClaw](https://github.com/openclaw/openclaw), following Mario's project philosophy.
 
-## Why This Exists
-
-We learned the hard way. 38 of 40 PRs closed, duplicates, broken code, noise. This skill encodes the discipline that would have prevented all of it.
+Built from the hard lesson of closing 38 of 40 PRs.
 
 ## Pipeline
 
 ```
-/analyze <issue>    -> .state/analysis.md   (verdict=FIX|SKIP)
-/checkdupe <issue>  -> .state/dupecheck.md  (existing_prs=0)     <- HARD GATE
-/fix <issue>        -> .state/fix.md        (lint, format, push)  <- HARD GATE
-/submit <issue>     -> .state/submitted.md  (pr_number, pr_url)
-/monitor            -> .state/monitor.md    (per-PR status)
-/respond <pr>       -> .state/responded.md  (all feedback addressed)
-/close <pr>         -> .state/closed.md     (honest reason)
+/analyze <issue>    -> .state/analysis.md   verdict=FIX|SKIP
+/checkdupe <issue>  -> .state/dupecheck.md  existing_prs=0        <- HARD GATE
+/fix <issue>        -> .state/fix.md        build+check+test+push <- HARD GATE
+/submit <issue>     -> .state/submitted.md  pr_number + issue comment
+/monitor            -> .state/monitor.md    CI + review status
+/respond <pr>       -> .state/responded.md  all feedback addressed
+/close <pr>         -> .state/closed.md     honest reason
 ```
 
-Each step produces machine-readable `.state/*.md` artifacts (key=value format). Hard gates block progression on failure.
+## What Gets Merged (learned from watching the repo)
 
-## Key Rules
+- Tested fixes with clear root-cause explanations
+- Net-negative LOC consolidation refactors
+- PRs from contributors who engage (comment on issues, respond to feedback)
+- AI-assisted PRs that are transparent about it
 
-1. **Check duplicates before any code** (`existing_prs=0` is a hard gate)
-2. **One PR at a time** (finish including review feedback before next)
-3. **Verify gates locally** (oxfmt + oxlint must pass)
-4. **Address every review comment** (Greptile and maintainer)
-5. **Close your own broken PRs** (honest comments, no ghosting)
+## What Gets Ignored
+
+- Spray-and-pray bot PRs with no engagement
+- PRs that don't run `pnpm build && pnpm check && pnpm test`
+- Duplicates of existing PRs
 
 ## Companion
 

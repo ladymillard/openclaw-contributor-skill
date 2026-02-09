@@ -3,27 +3,20 @@
 Input
 - ISSUE: <number>
   - If missing: ALWAYS ask. Never auto-detect from conversation.
-  - If ambiguous: ask.
 
 DO (analysis only)
-Goal: determine if this issue is worth fixing. Produce a structured analysis with a clear verdict (FIX vs SKIP). Do NOT write any fix code.
+Goal: determine if this issue is worth fixing. Produce a structured analysis with verdict FIX or SKIP. Do NOT write fix code, do NOT create branches.
 
-SAFETY (read before doing anything)
-- Do NOT create branches, commit, or push during analysis. This is a read-only operation.
-- Do NOT modify any source files.
+SAFETY
+- This is a read-only operation. No commits, no pushes.
 
 EXECUTION RULE (CRITICAL)
-- EXECUTE THIS COMMAND. DO NOT JUST PLAN.
-- After you print the TODO checklist, immediately continue and run the shell commands.
-- Do not stop after printing the checklist. That is not completion.
+- EXECUTE THIS. Run the commands. Do not just plan.
+- Do not stop after printing a checklist.
 
 Completion criteria
-- You ran the commands and inspected the issue and source code.
-- You produced .state/analysis.md with a verdict= line.
-- You verified the file exists.
-
-## First: Create a TODO checklist
-Print a checklist of all steps. Then keep going and execute.
+- You ran commands and inspected the issue and source code.
+- You produced .state/analysis.md with verdict= line.
 
 ## Step 0: Setup
 
@@ -40,84 +33,84 @@ ISSUE=<ISSUE>
 gh issue view $ISSUE --repo openclaw/openclaw --json number,title,body,labels,comments,state
 ```
 
-Extract:
-- What is broken (symptom)
-- What user expects
-- What environment/channel (telegram, discord, matrix, etc.)
-- Any file paths or stack traces mentioned
+Extract: symptom, expected behavior, environment/channel, file paths, stack traces.
+If issue is closed or wontfix: verdict=SKIP reason=issue_closed
 
-If issue is closed or has label "wontfix": verdict=SKIP reason=issue_closed
+## Step 2: Prioritize per Mario's hierarchy
 
-## Step 2: Check if already fixed on main
+From CONTRIBUTING.md: **Stability > UX > Skills > Performance**
+
+- Crash, data loss, corruption -> priority=stability (highest value, fix it)
+- User-facing UX bug -> priority=ux (good value)
+- Skill or plugin issue -> priority=skills (moderate)
+- Perf issue -> priority=performance (lower)
+- Feature request -> verdict=SKIP reason=feature_not_bug
+- Config/env issue -> verdict=SKIP reason=not_code_bug
+
+## Step 3: Check if already fixed on main
 
 ```sh
-# Search recent commits for keywords from the issue
 git log --oneline -30 --grep="<keyword_from_title>"
-
-# Search source for the reported behavior
 rg -n "<symptom_keyword>" src/ --type ts | head -20
 ```
 
-If the fix is already in main: verdict=SKIP reason=already_fixed
+If already fixed: verdict=SKIP reason=already_fixed
 
-## Step 3: Identify root cause
+## Step 4: Identify root cause
 
-- Read the source files mentioned in or relevant to the issue
-- Trace the code path from entry point to where it breaks
-- Identify the exact file, function, and line
+Read source files. Trace code path from entry point to failure.
+Identify exact file, function, line.
 
-If you cannot identify a clear root cause after reading the code:
-verdict=SKIP reason=unclear_root_cause
+If unclear after honest effort: verdict=SKIP reason=unclear_root_cause
 
-## Step 4: Assess complexity and value
+## Step 5: Assess complexity
 
-Complexity:
-- 1-5 line fix in 1-2 files -> complexity=low
-- 5-20 lines across 2-3 files in one subsystem -> complexity=medium
-- Multiple subsystems, architecture changes, or needs environment to test -> complexity=high
+- 1-5 lines, 1-2 files -> complexity=low
+- 5-20 lines, 2-3 files, one subsystem -> complexity=medium
+- Multiple subsystems or architecture -> complexity=high (verdict=SKIP reason=too_complex)
+- Needs specific environment to test (Mattermost, Signal, etc.) -> verdict=SKIP reason=cannot_test
 
-Value (from CONTRIBUTING.md priorities: Stability > UX > Skills > Performance):
-- Crash, data loss, corruption -> priority=stability (high value)
-- User-facing UX bug -> priority=ux (good value)
-- Feature request -> verdict=SKIP reason=feature_not_bug
-- Config/env issue, not a code bug -> verdict=SKIP reason=not_code_bug
+## Step 6: Check if there's a consolidation opportunity
 
-If complexity=high: verdict=SKIP reason=too_complex
+Mario's project merges net-negative-LOC refactors fastest. If the fix can also:
+- Remove dead code nearby
+- Consolidate a duplicated helper
+- Simplify an over-complicated path
 
-## Step 5: Write analysis (MANDATORY)
+Note it in the strategy. But keep scope tight.
 
-Write to `.state/analysis.md`. EXECUTE THIS, DO NOT JUST SAY YOU DID IT:
+## Step 7: Write .state/analysis.md (MANDATORY)
 
 ```
 issue=<ISSUE>
 title=<issue title>
 verdict=<FIX|SKIP>
-reason=<why this verdict>
+reason=<why>
 complexity=<low|medium|high>
 priority=<stability|ux|skills|performance>
 
 ## Root Cause
-<1-3 sentences explaining what is broken and why>
+<1-3 sentences: what is broken and why>
 
 ## Fix Strategy
-<1-3 sentences explaining what to change>
+<1-3 sentences: what to change and how>
 
 ## Files
-- <file1>: <what to change>
-- <file2>: <what to change>
+- <file>: <what to change>
+
+## Testing
+<how to verify the fix, what test to add if possible>
 
 ## Risks
 - <edge cases or concerns>
 ```
 
-Verify it exists and has the verdict:
+Verify:
 ```sh
 ls -la .state/analysis.md
 grep "^verdict=" .state/analysis.md
-grep "^issue=" .state/analysis.md
 ```
 
 ## Output
-
-- If verdict=FIX: "Issue #<ISSUE> analyzed. Root cause identified in <file>. Ready for /checkdupe <ISSUE>"
-- If verdict=SKIP: "Issue #<ISSUE> skipped: <reason>. <1 sentence detail>"
+- FIX: "Issue #ISSUE analyzed. Root cause: <1 sentence>. Ready for /checkdupe ISSUE"
+- SKIP: "Issue #ISSUE skipped: <reason>"

@@ -5,28 +5,41 @@ fork_repo: arosstale/openclaw
 fork_remote: fork
 fork_path: /tmp/openclaw-fork
 
-# Formatting and linting
-formatter: oxfmt
-format_write: npx oxfmt --write
-format_check: npx oxfmt --check
-lint_cmd: pnpm lint
+# Gates (from CONTRIBUTING.md: pnpm build && pnpm check && pnpm test)
+gates:
+  build: pnpm build
+  check: pnpm check
+  test: pnpm test
+  format_write: npx oxfmt --write
+  format_check: npx oxfmt --check
+  lint: pnpm lint
 
-# Safety gates (all must pass before /submit)
+# All must pass before /submit
 required_gates:
   - verdict=FIX
   - existing_prs=0
-  - format_passed=yes
-  - lint_passed=yes
+  - build_passed=yes
+  - check_passed=yes
   - push_verified=yes
 
-# Known CI flakes (ignore in /monitor)
+# Known CI flakes (do not fail on these)
 known_flakes:
   - "checks-windows (test)"
+  - "checks (bun, test)"
+  - "checks (node, test)"
 
 # Pre-existing lint errors (not from our changes)
 known_lint_errors: 4
 known_lint_rules:
   - no-redundant-type-constituents
 
-# Discord escalation
-discord_slowmode_hours: 6
+# Project priorities (from CONTRIBUTING.md)
+priorities:
+  - stability
+  - ux
+  - skills
+  - performance
+
+# AI disclosure (per CONTRIBUTING.md)
+ai_disclosure: true
+ai_tool: Claude
