@@ -1,89 +1,86 @@
 ---
 name: openclaw-contributor
-description: Deterministic workflow for contributing to OpenClaw, following Mario's project philosophy. Stability > UX > Skills > Performance. AI-assisted PRs welcome with transparency. Each step gates the next with machine-readable artifacts.
+description: Contribute bug fixes to openclaw/openclaw via fork. Deterministic pipeline with hard gates between phases. Compatible with pi, Claude Code, and Codex CLI.
 ---
 
 # OpenClaw Contributor
 
-Deterministic pipeline: analyze -> checkdupe -> fix -> submit -> monitor -> respond -> close.
-Each step produces machine-readable artifacts in `.state/` consumed by the next.
+Bug fix pipeline for openclaw/openclaw. Each phase produces a state file consumed by the next. Hard gates prevent progression on failure.
 
-## Mario's Project Philosophy
+## Setup
 
-From CONTRIBUTING.md and what actually gets merged:
+Fork at `arosstale/openclaw`, cloned to `/tmp/openclaw-fork`. Remotes: `origin` = upstream, `fork` = our fork.
 
-1. **Stability > UX > Skills > Performance** — crash fixes and data-loss prevention first
-2. **One thing per PR** — focused, minimal, reviewable
-3. **Describe what and why** — not just what changed, but why the old code was wrong
-4. **AI PRs welcome, be transparent** — mark as AI-assisted, note testing level, confirm you understand the code
-5. **Test locally** — `pnpm build && pnpm check && pnpm test` before submitting
-6. **Engage after submission** — comment on the issue linking your PR, respond to feedback promptly
-7. **Net-negative LOC wins** — consolidation and simplification get merged fastest
+## Workflow
 
-What gets merged: tested fixes, consolidation refactors, engaged contributors.
-What gets ignored: spray-and-pray bot PRs with zero engagement.
+**Phases in order: ANALYZE -> CHECKDUPE -> FIX -> SUBMIT -> MONITOR**
 
-## Hard-Won Rules (from closing 38 of 40 PRs)
+You MUST follow phases in order. You MUST NOT skip CHECKDUPE (we closed 38 of 40 PRs because we skipped it).
 
-1. CHECK FOR EXISTING PRs FIRST — the /checkdupe gate would have prevented 38 closures
-2. ONE PR AT A TIME — finish completely including review feedback
-3. CLOSE YOUR OWN BROKEN PRs — honest comments, no ghosting
+### ANALYZE
+1. Read the issue: `gh issue view <N> --repo openclaw/openclaw --json title,body,labels,comments,state`
+2. Trace root cause in source code
+3. Assess: crash/data-loss (stability), UX bug, or feature request (skip)
+4. Write `.state/analysis.md` with `verdict=FIX` or `verdict=SKIP`
+5. STOP if SKIP
 
-## Pipeline
+### CHECKDUPE
+1. Search: `gh search prs --repo openclaw/openclaw --state open "<issue-number>"`
+2. Search by keywords from title
+3. Check issue comments for linked PRs
+4. Write `.state/dupecheck.md` with `existing_prs=<N>`
+5. STOP if existing_prs > 0
 
-```
-/analyze <issue>
-  | .state/analysis.md (verdict=FIX|SKIP)
-  | gate: verdict=FIX
-/checkdupe <issue>
-  | .state/dupecheck.md (existing_prs=0)
-  | gate: existing_prs=0
-/fix <issue>
-  | .state/fix.md (build_passed=yes, check_passed=yes, test_passed=yes, push_verified=yes)
-  | gate: all four yes
-/submit <issue>
-  | .state/submitted.md (pr_number=N, pr_url=URL)
-  | gate: PR created + CI triggered
-/monitor
-  | .state/monitor.md (per-PR status)
-/respond <pr>
-  | .state/responded.md (all_addressed=yes)
-/close <pr>
-  | .state/closed.md
-```
+### FIX
+1. Branch from main: `fix/<issue>-<slug>`
+2. Implement minimal fix. Follow existing patterns.
+3. Format: `npx oxfmt --write <files>`
+4. Verify: `pnpm build && pnpm check && pnpm test`
+5. Commit specific files only (never `git add -A`)
+6. Push to fork, verify sha match
+7. Write `.state/fix.md` with `push_verified=yes`
 
-## Artifact Format
+### SUBMIT
+1. Create PR with `gh pr create` — title: `fix(<scope>): <desc>`, body: what broke, why, fix
+2. Include `Fixes #<issue>` in body
+3. Include AI disclosure: "AI-assisted. I understand what the code does."
+4. Comment on the issue linking the PR
+5. Write `.state/submitted.md` with `pr_number=<N>`
 
-Machine-readable `key=value` on own line, parseable with:
+### MONITOR
+1. Check CI, reviews, comments on open PRs
+2. Respond to all feedback immediately
+3. Close your own broken PRs honestly
+
+## State Files
+
+All in `.state/` (gitignored). Machine-readable `key=value` fields:
 ```sh
-sed -n 's/^key=//p' .state/file.md
+sed -n 's/^verdict=//p' .state/analysis.md
 ```
 
 ## Commands
 
-Command files in `commands/` are self-contained. Subagents read them directly.
+Detailed instructions for each phase live in `commands/`:
+- `commands/analyze.md`
+- `commands/checkdupe.md`
+- `commands/fix.md`
+- `commands/submit.md`
+- `commands/monitor.md`
+- `commands/respond.md`
+- `commands/close.md`
 
-| Command | Produces | Gate |
-|---|---|---|
-| `/analyze <issue>` | `.state/analysis.md` | verdict=FIX |
-| `/checkdupe <issue>` | `.state/dupecheck.md` | existing_prs=0 |
-| `/fix <issue>` | `.state/fix.md` | build + check + test + push all yes |
-| `/submit <issue>` | `.state/submitted.md` | pr_number present |
-| `/monitor` | `.state/monitor.md` | informational |
-| `/respond <pr>` | `.state/responded.md` | all_addressed=yes |
-| `/close <pr>` | `.state/closed.md` | terminal |
+## Code Rules
 
-## Environment
+- `Record<string, unknown>` not `any`
+- Always braces for if/else
+- Formatter: oxfmt (not prettier)
+- Linter: oxlint via `pnpm lint`
+- Never `git add -A`, never `git reset --hard`
+- If rebase conflicts in files you didn't modify: abort, report
 
-- Fork repo: `/tmp/openclaw-fork`
-- Remote `fork`: `arosstale/openclaw`
-- Remote `origin`: `openclaw/openclaw`
-- Build: `pnpm build`
-- Check: `pnpm check` (format + lint combined)
-- Test: `pnpm test`
-- Formatter: `npx oxfmt --write <file>` (NOT prettier)
-- Linter: `pnpm lint` (oxlint --type-aware)
-- Known CI flake: `checks-windows (test)` always fails (#12119)
-- Known repo-wide failures: bun test and node test currently failing on ALL PRs
-- Pre-existing lint: 4 `no-redundant-type-constituents` errors (not ours)
-- Pre-existing macOS: `GatewayModels.swift` file_length lint violation
+## When to Use
+
+- You found a bug report in openclaw/openclaw issues
+- You can identify the root cause and fix it in 1-5 lines
+- No existing PR addresses the same issue

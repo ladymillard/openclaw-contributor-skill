@@ -1,34 +1,23 @@
 # openclaw-contributor-skill
 
-Deterministic agentic workflow for contributing to [OpenClaw](https://github.com/openclaw/openclaw), following Mario's project philosophy.
+Bug fix pipeline for [openclaw/openclaw](https://github.com/openclaw/openclaw). Deterministic phases with hard gates. Compatible with pi, Claude Code, Codex CLI.
 
-Built from the hard lesson of closing 38 of 40 PRs.
-
-## Pipeline
+## Phases
 
 ```
-/analyze <issue>    -> .state/analysis.md   verdict=FIX|SKIP
-/checkdupe <issue>  -> .state/dupecheck.md  existing_prs=0        <- HARD GATE
-/fix <issue>        -> .state/fix.md        build+check+test+push <- HARD GATE
-/submit <issue>     -> .state/submitted.md  pr_number + issue comment
-/monitor            -> .state/monitor.md    CI + review status
-/respond <pr>       -> .state/responded.md  all feedback addressed
-/close <pr>         -> .state/closed.md     honest reason
+/analyze <issue>   -> .state/analysis.md   -> verdict=FIX required
+/checkdupe <issue> -> .state/dupecheck.md  -> existing_prs=0 required
+/fix <issue>       -> .state/fix.md        -> push_verified=yes required
+/submit <issue>    -> .state/submitted.md  -> PR created
+/monitor           -> check CI + reviews
+/respond <pr>      -> address feedback
+/close <pr>        -> close with reason
 ```
 
-## What Gets Merged (learned from watching the repo)
+## When to Use
 
-- Tested fixes with clear root-cause explanations
-- Net-negative LOC consolidation refactors
-- PRs from contributors who engage (comment on issues, respond to feedback)
-- AI-assisted PRs that are transparent about it
-
-## What Gets Ignored
-
-- Spray-and-pray bot PRs with no engagement
-- PRs that don't run `pnpm build && pnpm check && pnpm test`
-- Duplicates of existing PRs
+You found a bug in openclaw/openclaw, can identify the root cause, and can fix it in 1-5 lines with no existing PR addressing it.
 
 ## Companion
 
-[openclaw-maintainer-skill](https://github.com/arosstale/openclaw-maintainer-skill) for the maintainer side.
+[openclaw-maintainer-skill](https://github.com/arosstale/openclaw-maintainer-skill) for review/prep/merge.

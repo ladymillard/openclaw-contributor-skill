@@ -1,45 +1,13 @@
-# OpenClaw Contributor Skill Configuration
-
 target_repo: openclaw/openclaw
 fork_repo: arosstale/openclaw
 fork_remote: fork
 fork_path: /tmp/openclaw-fork
-
-# Gates (from CONTRIBUTING.md: pnpm build && pnpm check && pnpm test)
 gates:
   build: pnpm build
   check: pnpm check
   test: pnpm test
-  format_write: npx oxfmt --write
-  format_check: npx oxfmt --check
-  lint: pnpm lint
-
-# All must pass before /submit
-required_gates:
-  - verdict=FIX
-  - existing_prs=0
-  - build_passed=yes
-  - check_passed=yes
-  - push_verified=yes
-
-# Known CI flakes (do not fail on these)
+  format: npx oxfmt --write
 known_flakes:
   - "checks-windows (test)"
   - "checks (bun, test)"
   - "checks (node, test)"
-
-# Pre-existing lint errors (not from our changes)
-known_lint_errors: 4
-known_lint_rules:
-  - no-redundant-type-constituents
-
-# Project priorities (from CONTRIBUTING.md)
-priorities:
-  - stability
-  - ux
-  - skills
-  - performance
-
-# AI disclosure (per CONTRIBUTING.md)
-ai_disclosure: true
-ai_tool: Claude
