@@ -1,20 +1,19 @@
-# Skill files
-config.yaml.local
-*.test.ts
-.env
-.env.local
-
-# System
-.DS_Store
-*.swp
-*.swo
-*~
-
-# Node
-node_modules/
-package-lock.json
 
 # IDE
-.vscode/
-.idea/
+# Node
+# Skill files
+# System
 *.sublime-*
+*.swo
+*.swp
+*.test.ts
+*~
+.DS_Store
+.env
+.env.local
+.idea/
+.state/
+.vscode/
+config.yaml.local
+node_modules/
+package-lock.json
