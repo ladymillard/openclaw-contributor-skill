@@ -3,6 +3,30 @@
 target_repo: openclaw/openclaw
 fork_repo: arosstale/openclaw
 fork_remote: fork
+fork_path: /tmp/openclaw-fork
 
-# The only rule that matters
-check_duplicates_first: true
+# Formatting and linting
+formatter: oxfmt
+format_write: npx oxfmt --write
+format_check: npx oxfmt --check
+lint_cmd: pnpm lint
+
+# Safety gates (all must pass before /submit)
+required_gates:
+  - verdict=FIX
+  - existing_prs=0
+  - format_passed=yes
+  - lint_passed=yes
+  - push_verified=yes
+
+# Known CI flakes (ignore in /monitor)
+known_flakes:
+  - "checks-windows (test)"
+
+# Pre-existing lint errors (not from our changes)
+known_lint_errors: 4
+known_lint_rules:
+  - no-redundant-type-constituents
+
+# Discord escalation
+discord_slowmode_hours: 6

@@ -1,74 +1,210 @@
 /fix
 
-Input: ISSUE=<number>
-Prerequisites: .state/analysis.md (verdict=FIX), .state/dupecheck.md (existing_prs=0)
-Produces: .state/fix.md with lint_passed=yes, format_passed=yes, push_verified=yes
-Gate: all three must be yes
+Input
+- ISSUE: <number>
+  - If missing: ALWAYS ask.
 
-EXECUTION RULE: Write code. Run gates. Do not just plan.
+DO (implement fix only)
+Goal: implement the fix, pass all local gates (format, lint), commit to a feature branch, push to fork. Do NOT create the PR yet.
 
-## Steps
+SAFETY
+- NEVER push to `main` or `origin/main`. All pushes go to feature branches on `fork` remote.
+- Do NOT run `git add -A` or `git add .`. Always stage specific files you changed.
+- Do NOT run `git push` without specifying remote and branch.
+
+EXECUTION RULE (CRITICAL)
+- EXECUTE THIS. Write the code. Run the gates.
+- If gates fail, fix the issue and rerun. MAX 3 ATTEMPTS.
+- Do not stop after implementing. You must also format, lint, commit, push, and verify.
+
+Known footguns
+- Formatter is `oxfmt`, NOT prettier. `npx oxfmt --write <file>` / `npx oxfmt --check <file>`
+- Linter is `pnpm lint` (oxlint --type-aware). Watch for `no-explicit-any` and `curly` rules.
+- There are 4 pre-existing lint errors (no-redundant-type-constituents). These are NOT from us.
+- `pnpm install` may be needed if dependencies changed.
+
+Completion criteria
+- Code implements the fix from .state/analysis.md
+- `npx oxfmt --check <files>` passes
+- `pnpm lint` shows no NEW errors
+- Committed to feature branch
+- Pushed to fork remote
+- Push verified (local sha == remote sha)
+- .state/fix.md written with all gate fields
+
+## Step 0: Load prerequisites
 
 ```sh
 cd /tmp/openclaw-fork
 ISSUE=<ISSUE>
-grep -q "^verdict=FIX" .state/analysis.md || exit 1
-grep -q "^existing_prs=0" .state/dupecheck.md || exit 1
+
+if [ ! -f .state/analysis.md ]; then
+  echo "ERROR: Run /analyze $ISSUE first"
+  exit 1
+fi
+if [ ! -f .state/dupecheck.md ]; then
+  echo "ERROR: Run /checkdupe $ISSUE first"
+  exit 1
+fi
+
+verdict=$(sed -n 's/^verdict=//p' .state/analysis.md)
+dupes=$(sed -n 's/^existing_prs=//p' .state/dupecheck.md)
+
+if [ "$verdict" != "FIX" ]; then
+  echo "ERROR: verdict=$verdict, not FIX"
+  exit 1
+fi
+if [ "$dupes" != "0" ]; then
+  echo "ERROR: existing_prs=$dupes, not 0"
+  exit 1
+fi
+
+echo "Prerequisites verified. Proceeding with fix for #$ISSUE"
 ```
 
-1) Branch:
+## Step 1: Create branch
+
 ```sh
 git checkout main && git pull origin main
-git checkout -b fix/$ISSUE-<brief>
+git checkout -b fix/$ISSUE-<brief-description>
 ```
 
-2) Implement from .state/analysis.md strategy. Rules:
-   - Minimal change, root cause only
-   - Follow existing patterns
-   - Record<string, unknown> not any
-   - Always braces for if/else
-   - Match content format from surrounding code
+Use a short descriptive name. Example: `fix/12345-telegram-crash`
 
-3) Format and lint:
+## Step 2: Read the fix strategy
+
 ```sh
-npx oxfmt --write <files>
-pnpm lint 2>&1 | tail -10
+cat .state/analysis.md
 ```
-Only 4 pre-existing errors acceptable. Fix NEW errors.
 
-4) Review: `git diff` — every line justified, minimal, safe.
+Read the Root Cause, Fix Strategy, and Files sections. Understand exactly what to change before writing code.
 
-5) Commit and push:
+## Step 3: Implement the fix
+
+Rules for writing code:
+- Minimal change. Fix the root cause, nothing else. No drive-by refactors.
+- Follow existing patterns in the file. Match style, naming, error handling.
+- Use `Record<string, unknown>` not `any` (lint rule: no-explicit-any)
+- Always use braces for if/else/for/while (lint rule: curly)
+- Check content format: is it `string` or `{type, text}[]`? Match surrounding code.
+- Check model IDs: is it `"model"` or `"provider/model"`? Match callers.
+- If adding a constant, check if one already exists nearby.
+- If adding error handling, check how the same file handles similar errors.
+
+## Step 4: Format
+
 ```sh
-git add <specific-files-only>
-git commit -m 'fix(<scope>): <description>
+npx oxfmt --write <changed-file-1> <changed-file-2>
+npx oxfmt --check <changed-file-1> <changed-file-2>
+```
+
+Both must succeed. If `--check` fails after `--write`, something is wrong.
+
+## Step 5: Lint
+
+```sh
+pnpm lint 2>&1 | tail -20
+```
+
+Count errors. Only 4 pre-existing errors are acceptable:
+- `no-redundant-type-constituents` for ZodIssue (2 occurrences)
+- `no-redundant-type-constituents` for TemplateResult (2 occurrences)
+
+If there are NEW errors from files we changed, fix them and reformat.
+MAX 3 fix-lint cycles. If still failing, stop and report.
+
+## Step 6: Review diff
+
+```sh
+git diff --stat
+git diff
+```
+
+Read every line. For each changed line, ask:
+- Does this actually fix the reported issue?
+- Could this break anything else?
+- Is this the minimal change needed?
+- Would I be embarrassed if a maintainer read this?
+
+If anything looks wrong, fix it, reformat, relint.
+
+## Step 7: Commit
+
+Stage only specific files:
+```sh
+git add <file1> <file2>
+```
+
+NEVER `git add -A` or `git add .`.
+
+Commit message format:
+```sh
+git commit -m 'fix(<scope>): <brief description>
+
+<1-2 sentences: what was broken, why, what this changes>
 
 Fixes #<ISSUE>'
-git push fork fix/$ISSUE-<brief>
 ```
 
-6) Verify push:
+Scope should match the subsystem: agents, telegram, discord, matrix, gateway, media, auto-reply, etc.
+
+## Step 8: Push
+
+```sh
+git push fork fix/$ISSUE-<brief-description>
+```
+
+If push fails, check that the fork remote is configured:
+```sh
+git remote -v | grep fork
+```
+
+## Step 9: Verify push (MANDATORY)
+
 ```sh
 local_sha=$(git rev-parse HEAD)
-remote_sha=$(git ls-remote fork "refs/heads/fix/$ISSUE-<brief>" | awk '{print $1}')
-[ "$local_sha" = "$remote_sha" ] && echo "push_verified=yes" || exit 1
+remote_sha=$(git ls-remote fork "refs/heads/fix/$ISSUE-<brief-description>" | awk '{print $1}')
+
+echo "local_sha=$local_sha"
+echo "remote_sha=$remote_sha"
+
+if [ "$local_sha" != "$remote_sha" ]; then
+  echo "ERROR: push verification failed. local=$local_sha remote=$remote_sha"
+  exit 1
+fi
+echo "push_verified=yes"
 ```
 
-7) Write .state/fix.md:
+## Step 10: Write fix state (MANDATORY)
+
+Write to `.state/fix.md`:
+
 ```
-issue=<N>
-branch=fix/<N>-<brief>
-head_sha=<sha>
+issue=<ISSUE>
+branch=fix/<ISSUE>-<description>
+head_sha=<sha from git rev-parse HEAD>
 push_verified=yes
 format_passed=yes
 lint_passed=yes
-files_changed=<N>
+files_changed=<number of files>
 
-## Files
-- <file>: <change>
+## Files Modified
+- <file1>: <what changed and why>
+- <file2>: <what changed and why>
 
-## Summary
-<2-3 sentences>
+## Fix Summary
+<2-3 sentences describing what the fix does>
 ```
 
-Output: "Fix ready. Ready for /submit ISSUE"
+Verify:
+```sh
+ls -la .state/fix.md
+grep "^push_verified=" .state/fix.md
+grep "^lint_passed=" .state/fix.md
+grep "^format_passed=" .state/fix.md
+```
+
+## Output
+
+- If all gates passed: "Fix for #<ISSUE> ready on branch <branch>. <N> files changed. Ready for /submit <ISSUE>"
+- If any gate failed: report which gate failed, what the error was, and stop.
