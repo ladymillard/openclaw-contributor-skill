@@ -2,6 +2,12 @@
 
 Bug fix pipeline for [openclaw/openclaw](https://github.com/openclaw/openclaw). Deterministic phases with hard gates. Compatible with pi, Claude Code, Codex CLI.
 
+## 🐸 Yellow BRIC-Toad Kids Skill
+
+An interactive web-based exploration adventure for children! See **[kids-skill/README.md](./kids-skill/README.md)** for details on this educational feature that combines exploration, creativity, and learning in a safe digital environment.
+
+**Features:** Interactive guide character, colorful discovery paths, drawing canvas, counting games, music keyboard, and shape activities.
+
 ## 🇯🇲 Jamaica Cell Phone Infrastructure Project
 
 See **[JAMAICA_PROJECT.md](./JAMAICA_PROJECT.md)** for details on the Jamaica cell phone infrastructure initiative - a community-driven project to build CAN-free clear systems for an autonomous world through repurposed cell phone technology.
