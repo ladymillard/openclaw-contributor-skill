@@ -2,6 +2,10 @@
 
 Bug fix pipeline for [openclaw/openclaw](https://github.com/openclaw/openclaw). Deterministic phases with hard gates. Compatible with pi, Claude Code, Codex CLI.
 
+## 🇯🇲 Jamaica Cell Phone Infrastructure Project
+
+See **[JAMAICA_PROJECT.md](./JAMAICA_PROJECT.md)** for details on the Jamaica cell phone infrastructure initiative - a community-driven project to build CAN-free clear systems for an autonomous world through repurposed cell phone technology.
+
 ## Phases
 
 ```
