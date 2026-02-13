@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Follow the Yellow BRIC-Toad - Kids Exploration Adventure</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🐸 Follow the Yellow BRIC-Toad! 🌟</h1>
+            <p class="subtitle">An Internet Exploration Adventure for Little Kids</p>
+        </header>
+
+        <div class="game-area">
+            <!-- The Yellow BRIC-Toad Guide -->
+            <div id="toad-guide" class="toad-guide">
+                <div class="toad-character">🐸</div>
+                <div class="toad-speech-bubble">
+                    <p id="toad-message">Hi! I'm the Yellow BRIC-Toad! Click on the colorful paths to explore!</p>
+                </div>
+            </div>
+
+            <!-- Interactive Exploration Path -->
+            <div class="exploration-path">
+                <div class="path-node yellow" data-discovery="yellow">
+                    <div class="node-icon">🌟</div>
+                    <span class="node-label">Yellow Path</span>
+                </div>
+                
+                <div class="path-node blue" data-discovery="blue">
+                    <div class="node-icon">🔵</div>
+                    <span class="node-label">Blue Path</span>
+                </div>
+                
+                <div class="path-node red" data-discovery="red">
+                    <div class="node-icon">❤️</div>
+                    <span class="node-label">Red Path</span>
+                </div>
+                
+                <div class="path-node green" data-discovery="green">
+                    <div class="node-icon">🌿</div>
+                    <span class="node-label">Green Path</span>
+                </div>
+            </div>
+
+            <!-- Discovery Area -->
+            <div id="discovery-area" class="discovery-area">
+                <h2>🎉 Your Discoveries</h2>
+                <div id="discoveries-list" class="discoveries-list">
+                    <p class="hint">Click on the colorful paths above to make discoveries!</p>
+                </div>
+            </div>
+
+            <!-- Mini Activities -->
+            <div class="activities-section">
+                <h2>🎨 Fun Activities</h2>
+                <div class="activities-grid">
+                    <button class="activity-btn" data-activity="draw">
+                        <span class="activity-icon">🎨</span>
+                        <span>Draw with Toad</span>
+                    </button>
+                    <button class="activity-btn" data-activity="count">
+                        <span class="activity-icon">🔢</span>
+                        <span>Count with Toad</span>
+                    </button>
+                    <button class="activity-btn" data-activity="music">
+                        <span class="activity-icon">🎵</span>
+                        <span>Make Music</span>
+                    </button>
+                    <button class="activity-btn" data-activity="shapes">
+                        <span class="activity-icon">⭐</span>
+                        <span>Find Shapes</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Activity Canvas -->
+            <div id="activity-canvas" class="activity-canvas hidden">
+                <button class="close-btn" id="close-activity">✖️</button>
+                <div id="activity-content"></div>
+            </div>
+        </div>
+
+        <!-- Sound Control -->
+        <div class="sound-control">
+            <button id="sound-toggle" class="sound-btn" title="Toggle Sound">
+                🔊
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
