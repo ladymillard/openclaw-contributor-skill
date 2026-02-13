@@ -12,6 +12,7 @@ Bug fix pipeline for [openclaw/openclaw](https://github.com/openclaw/openclaw). 
 /monitor           -> check CI + reviews
 /respond <pr>      -> address feedback
 /close <pr>        -> close with reason
+/jobstatus         -> check GitHub Actions workflow status
 ```
 
 ## When to Use
