@@ -9,7 +9,7 @@ COMMANDS_DIR="$SKILL_DIR/commands"
 
 echo "Setting up openclaw-contributor skill..."
 
-CMDS=(analyze.md checkdupe.md fix.md submit.md monitor.md respond.md close.md)
+CMDS=(analyze.md checkdupe.md fix.md submit.md monitor.md respond.md close.md jobstatus.md)
 
 # claude code symlinks
 mkdir -p ~/.claude/commands
@@ -50,3 +50,4 @@ echo "  /submit     - create PR on GitHub"
 echo "  /monitor    - check CI and review status"
 echo "  /respond    - address review feedback"
 echo "  /close      - close a PR with reason"
+echo "  /jobstatus  - check GitHub Actions workflow run status"

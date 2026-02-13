@@ -69,6 +69,7 @@ Detailed instructions for each phase live in `commands/`:
 - `commands/monitor.md`
 - `commands/respond.md`
 - `commands/close.md`
+- `commands/jobstatus.md`
 
 ## Code Rules
 
