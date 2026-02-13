@@ -24,7 +24,7 @@ gh run view <RUN_ID> --repo openclaw/openclaw --log
 Check failed jobs:
 ```sh
 # List failed jobs in recent runs
-gh run list --repo openclaw/openclaw --limit 10 --json databaseId,jobs --jq '.[] | select(.jobs != null) | .jobs[] | select(.conclusion == "failure") | "Run #\(.databaseId) - Job: \(.name) - \(.conclusion)"'
+gh run list --repo openclaw/openclaw --limit 10 --json databaseId,jobs --jq '.[] | select(.jobs != null) | . as $run | .jobs[] | select(.conclusion == "failure") | "Run #\($run.databaseId) - Job: \(.name) - \(.conclusion)"'
 ```
 
 ## Usage
