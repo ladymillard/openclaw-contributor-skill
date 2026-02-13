@@ -1,11 +1,23 @@
 ---
 name: openclaw-contributor
-description: Contribute bug fixes to openclaw/openclaw via fork. Deterministic pipeline with hard gates between phases. Compatible with pi, Claude Code, and Codex CLI.
+description: Contribute bug fixes to openclaw/openclaw via fork. Deterministic pipeline with hard gates between phases. Compatible with pi, Claude Code, and Codex CLI. Designed to be beginner-friendly!
 ---
 
 # OpenClaw Contributor
 
 Bug fix pipeline for openclaw/openclaw. Each phase produces a state file consumed by the next. Hard gates prevent progression on failure.
+
+## For Beginners
+
+**New to open source?** This skill guides you step-by-step through contributing bug fixes. You don't need to be an expert - just follow the phases in order, and the tool will check your work at each step.
+
+**What you'll learn:**
+- How to analyze bugs in open source projects
+- How to check if someone else is already working on an issue
+- How to make small, focused bug fixes
+- How to submit your work for review
+
+The key is to **follow the phases in order** - each one checks that you're ready for the next!
 
 ## Setup
 

@@ -1,13 +1,22 @@
 #!/bin/bash
 # openclaw-contributor setup script
-# creates symlinks for claude code and codex cli
+# Creates symlinks for Claude Code and Codex CLI
+# 
+# NEW TO GITHUB/BASH? This script sets up the tool on your computer.
+# Just run: bash setup.sh
+# If you see any errors, don't worry! Ask for help in the community.
 
 set -e
 
 SKILL_DIR="$(cd "$(dirname "$0")" && pwd)"
 COMMANDS_DIR="$SKILL_DIR/commands"
 
-echo "Setting up openclaw-contributor skill..."
+echo "========================================="
+echo "OpenClaw Contributor Setup"
+echo "========================================="
+echo ""
+echo "This will set up commands to help you contribute bug fixes."
+echo ""
 
 CMDS=(analyze.md checkdupe.md fix.md submit.md monitor.md respond.md close.md)
 
@@ -42,11 +51,22 @@ for cmd in "${CMDS[@]}"; do
 done
 
 echo ""
-echo "Done! Commands available:"
-echo "  /analyze    - analyze an issue (verdict: FIX or SKIP)"
-echo "  /checkdupe  - check for existing PRs (HARD GATE)"
-echo "  /fix        - implement fix, pass gates, push"
-echo "  /submit     - create PR on GitHub"
-echo "  /monitor    - check CI and review status"
-echo "  /respond    - address review feedback"
-echo "  /close      - close a PR with reason"
+echo "========================================="
+echo "Setup Complete!"
+echo "========================================="
+echo ""
+echo "Commands available (use these in order):"
+echo ""
+echo "  /analyze <issue>   - Start here! Analyze a bug report"
+echo "  /checkdupe <issue> - Check if anyone else is fixing it (DON'T SKIP!)"
+echo "  /fix <issue>       - Make the fix and test it"
+echo "  /submit <issue>    - Submit your fix for review"
+echo "  /monitor           - Check on your submission"
+echo "  /respond <pr>      - Respond to feedback"
+echo "  /close <pr>        - Close a PR if needed"
+echo ""
+echo "New to this? Start by finding a bug at:"
+echo "https://github.com/openclaw/openclaw/issues"
+echo ""
+echo "Then run: /analyze <issue-number>"
+echo ""
