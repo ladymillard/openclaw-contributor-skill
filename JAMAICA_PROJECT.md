@@ -239,7 +239,7 @@ Once your device is configured:
 ## Frequently Asked Questions
 
 **Q: How fast will this scale to 7 million devices?**
-A: The pace depends on donations, volunteers, and resources. We're starting small and scaling up as the community grows.
+A: The 7 million device goal is aspirational and long-term. We're starting with achievable milestones (see Roadmap) and scaling up as the community grows. The pace depends on donations, volunteers, and resources.
 
 **Q: Can I reprogram my own device?**
 A: Yes! Follow the DIY guide above. We also provide support and resources.
@@ -248,21 +248,29 @@ A: Yes! Follow the DIY guide above. We also provide support and resources.
 A: Donated devices are reprogrammed and distributed to community members who need them.
 
 **Q: Is this project free?**
-A: Yes, it's CAN-free and cost-free. The goal is accessible technology for all.
+A: Yes, it's both CAN-free (Controller Area Network-free, meaning decentralized) and cost-free. The goal is accessible technology for all.
 
 **Q: What if I don't have technical skills?**
 A: No problem! You can help with donations, community outreach, testing, or many other ways.
 
 ## Roadmap
 
+### Near-term Goals (Year 1)
 - [ ] Establish donation infrastructure
 - [ ] Build reprogramming capacity
 - [ ] Create training materials
 - [ ] Launch pilot program in Jamaica
 - [ ] Scale to 100,000 devices
+
+### Medium-term Goals (Years 2-3)
 - [ ] Expand to additional regions
 - [ ] Achieve 1 million active devices
-- [ ] Continue toward 7 million device goal
+- [ ] Establish sustainable operation model
+
+### Long-term Vision (Years 4+)
+- [ ] Scale to 3 million devices
+- [ ] Expand to multiple countries
+- [ ] Work toward aspirational 7 million device goal
 
 ## Contributing
 
