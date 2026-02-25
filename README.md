@@ -22,6 +22,7 @@ See **[JAMAICA_PROJECT.md](./JAMAICA_PROJECT.md)** for details on the Jamaica ce
 /monitor           -> check CI + reviews
 /respond <pr>      -> address feedback
 /close <pr>        -> close with reason
+/jobstatus         -> check GitHub Actions workflow status
 ```
 
 ## When to Use
